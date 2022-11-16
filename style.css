@@ -1,0 +1,16 @@
+#root {
+    display: block;
+}
+
+.letter {
+    font-size: 64px;
+    transition: margin 0.15s ease-out;
+}
+
+.split-before {
+    margin-left: 24px;
+}
+
+.split-after {
+    margin-right: 24px;
+}
