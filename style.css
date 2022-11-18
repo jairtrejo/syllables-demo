@@ -1,16 +1,126 @@
+@import "npm:the-new-css-reset/css/reset.css";
+
+/* Functionality */
 #root {
-    display: block;
+  display: block;
+  user-select: none;
+  letter-spacing: 0.1rem;
+}
+
+#root.correct {
+  transition: background-color 0.1s ease-out;
+  background-color: #ffb602;
+  /*background-color: #b7d23d;*/
+  /*border-color: #89c93f;*/
+  pointer-events: none;
+}
+
+.incorrect {
+  animation: shake 0.7s 1;
+}
+
+#root.game-over {
+  letter-spacing: normal;
 }
 
 .letter {
-    font-size: 64px;
-    transition: margin 0.15s ease-out;
+  font-size: 64px;
+  transition: margin 0.15s ease-out 0.02s;
 }
 
 .split-before {
-    margin-left: 24px;
+  margin-left: 24px;
 }
 
 .split-after {
-    margin-right: 24px;
+  margin-right: 24px;
+}
+
+@keyframes shake {
+  10%,
+  90% {
+    transform: translate3d(-1px, 0, 0);
+  }
+
+  20%,
+  80% {
+    transform: translate3d(2px, 0, 0);
+  }
+
+  30%,
+  50%,
+  70% {
+    transform: translate3d(-4px, 0, 0);
+  }
+
+  40%,
+  60% {
+    transform: translate3d(4px, 0, 0);
+  }
+}
+
+/* Eye candy */
+body {
+  font-family: "Avenir Next", "Helvetica", "Arial", Sans-serif;
+  font-size: 16px;
+  background-color: #ffb602;
+  color: #0b0709;
+}
+
+main {
+  max-width: 1000px;
+  margin: 0 auto;
+  height: 100vh;
+  padding: 64px 1rem;
+  text-align: center;
+}
+
+h1 {
+  font-weight: bold;
+  font-size: 1.2rem;
+  border-bottom: 2px solid #0b0709;
+  margin-bottom: 1.2rem;
+}
+
+h1,
+p {
+  text-align: left;
+}
+
+#root {
+  display: inline-block;
+  background-color: #fcfcfc;
+  padding: 10px 20px;
+  border-radius: 8px;
+  margin: 16px 0;
+  text-align: center;
+}
+
+#root.game-over {
+  font-size: 64px;
+  background-color: #ffb602;
+}
+
+p.button-row {
+  text-align: right;
+}
+
+button {
+  border: solid 2px #0b0709;
+  border-radius: 4px;
+  padding: 0.3rem;
+  width: 6rem;
+  text-align: center;
+  cursor: pointer;
+}
+
+button:hover {
+  background-color: #cd9200;
+}
+
+button:active {
+  color: #3b3739;
+  background-color: transparent;
+  border: none;
+  margin-top: 2px;
 }

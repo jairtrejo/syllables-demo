@@ -1,97 +1,189 @@
 const words = {
   ocuilin: "o·cui·lin",
   āhuiya: "ā·hui·ya",
+  huītzilin: "huī·tzi·lin",
+  calli: "cal·li",
+  tamalli: "ta·mal·li",
 };
 
 const root = document.getElementById("root");
 const checkBtn = document.getElementById("check-btn");
+const nextBtn = document.getElementById("next-btn");
+const restartBtn = document.getElementById("restart-btn");
 
-let prompts = Object.keys(words);
-let wordIndex = Math.floor(Math.random() * prompts.length);
-let prompt = prompts[wordIndex];
-let answer = words[prompt];
-delete words[prompt];
+/*
+ * Utilities
+ */
+function listen(element, eventName) {
+  const p = new Promise((resolve) => {
+    const listener = (e) => {
+      element.removeEventListener(eventName, listener);
+      resolve(e);
+    };
+    element.addEventListener(eventName, listener);
+  });
+  return p;
+}
 
-let currentSplit;
+function variadicize(f) {
+  return function (...args) {
+    if (args.length > 1) {
+      return args.map(f);
+    } else {
+      return f(args[0]);
+    }
+  };
+}
 
-for (l of prompt) {
-  const letter = document.createElement("span");
-
-  letter.classList.add("letter");
-  letter.innerText = l;
-
-  root.append(letter);
-};
-
-root.addEventListener("mousemove", function onLettersFocus(e) {
-  if (e.target === root) {
-    return;
-  }
-
-  if (currentSplit) {
-    currentSplit.classList.remove("split-before", "split-after");
-  }
-
-  const hovered = e.target;
-
-  if (hovered.innerText === "·") {
-    return;
-  }
-
-  const prevSibling = hovered.previousElementSibling;
-  const nextSibling = hovered.nextElementSibling;
-  const rect = hovered.getBoundingClientRect();
-  const position = (e.x - rect.left) / (rect.right - rect.left);
-
-  if (position < 0.5 && prevSibling && prevSibling.innerText !== "·") {
-    hovered.classList.add("split-before");
-  } else if (nextSibling && nextSibling.innerText !== "·") {
-    hovered.classList.add("split-after");
-  } else {
-    currentSplit = null;
-    return;
-  }
-
-  currentSplit = hovered;
+const show = variadicize(function show(element) {
+  element.style.display = "revert";
 });
 
-root.addEventListener("mouseleave", function onRootMouseOut() {
-  if (!currentSplit) {
-    return;
-  }
-  currentSplit.classList.remove("split-before", "split-after");
-  currentSplit = null;
+const hide = variadicize(function hide(element) {
+  element.style.display = "none";
 });
 
-root.addEventListener("click", function onSplitWord(e) {
-  if (e.target.innerText === "·") {
-    e.target.parentNode.removeChild(e.target);
-    return;
+/*
+ * Game loop
+ */
+(async function game() {
+  while (true) {
+    let exercises = Object.keys(words)
+      .sort(() => Math.random() - 0.5)
+      .map((word) => ({ prompt: word, answer: words[word] }));
+
+    root.innerText = "";
+    root.classList.remove("game-over");
+    hide(restartBtn);
+
+    while (exercises.length > 0) {
+      const { prompt, answer } = exercises.pop();
+
+      const cleanUp = syllabificator(root, prompt);
+      show(checkBtn);
+      hide(nextBtn);
+
+      let userAnswer;
+      do {
+        await listen(checkBtn, "click");
+
+        root.classList.remove("incorrect");
+        userAnswer = root.innerText;
+
+        if (userAnswer !== answer) {
+          setTimeout(() => root.classList.add("incorrect"), 10);
+        } else {
+          root.classList.add("correct");
+          show(nextBtn);
+          hide(checkBtn);
+          await listen(nextBtn, "click");
+          root.classList.remove("correct");
+        }
+      } while (userAnswer !== answer);
+
+      cleanUp();
+    }
+
+    root.innerText = "Good job!";
+    root.classList.add("game-over");
+    hide(checkBtn, nextBtn);
+    show(restartBtn);
+
+    await listen(restartBtn, "click");
+  }
+})();
+
+/*
+ * Main widget
+ */
+function syllabificator(root, prompt) {
+  let splitPoint;
+
+  function changeSplitPoint(e) {
+    if (e.target === root) {
+      return;
+    }
+
+    clearSplitPoint();
+
+    const hovered = e.target;
+    const prevSibling = hovered.previousElementSibling;
+    const nextSibling = hovered.nextElementSibling;
+
+    const rect = hovered.getBoundingClientRect();
+    const position = (e.x - rect.left) / (rect.right - rect.left);
+
+    if (hovered.innerText === "·") {
+      setSplitPoint(null);
+    } else if (position < 0.5 && prevSibling && prevSibling.innerText !== "·") {
+      setSplitPoint(prevSibling);
+    } else if (
+      position >= 0.5 &&
+      nextSibling &&
+      nextSibling.innerText !== "·"
+    ) {
+      setSplitPoint(hovered);
+    } else {
+      setSplitPoint(null);
+    }
   }
 
-  if (!currentSplit) {
-    return;
+  function setSplitPoint(element) {
+    if (element) {
+      element.classList.add("split-after");
+    }
+    splitPoint = element;
   }
 
-  const dot = document.createElement("span");
-  dot.classList.add("letter");
-  dot.innerText = "·";
-
-  if (currentSplit.classList.contains("split-after")) {
-    currentSplit.after(dot);
-  } else {
-    currentSplit.before(dot);
+  function clearSplitPoint() {
+    if (splitPoint) {
+      splitPoint.classList.remove("split-after");
+    }
+    splitPoint = null;
   }
 
-  currentSplit.classList.remove("split-before", "split-after");
-  currentSplit = null;
-});
+  function splitWord() {
+    if (!splitPoint) {
+      return;
+    }
 
-checkBtn.addEventListener("click", () => {
-  const userAnswer = root.innerText;
-  console.log(userAnswer);
-  if (userAnswer === answer) {
-    console.log("correct!");
+    const dot = document.createElement("span");
+    dot.classList.add("letter");
+    dot.innerText = "·";
+
+    splitPoint.after(dot);
+    clearSplitPoint();
   }
-  return 
-});
+
+  function removeSplit(e) {
+    if (e.target.innerText === "·") {
+      e.target.parentNode.removeChild(e.target);
+      return;
+    }
+  }
+
+  root.addEventListener("mousemove", changeSplitPoint);
+  root.addEventListener("mouseleave", clearSplitPoint);
+  root.addEventListener("click", splitWord);
+  root.addEventListener("click", removeSplit);
+
+  for (l of prompt) {
+    const letter = document.createElement("span");
+
+    letter.classList.add("letter");
+    letter.innerText = l;
+
+    root.append(letter);
+  }
+
+  return function cleanUp() {
+    root.removeEventListener("mousemove", changeSplitPoint);
+    root.removeEventListener("mouseleave", clearSplitPoint);
+    root.removeEventListener("click", splitWord);
+    root.removeEventListener("click", removeSplit);
+
+    while (root.firstChild) {
+      root.removeChild(root.firstChild);
+    }
+  };
+}

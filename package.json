@@ -9,5 +9,8 @@
   "license": "MIT",
   "devDependencies": {
     "parcel": "^2.8.0"
+  },
+  "dependencies": {
+    "the-new-css-reset": "^1.7.3"
   }
 }
