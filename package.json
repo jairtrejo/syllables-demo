@@ -3,12 +3,16 @@
   "version": "1.0.0",
   "description": "A syllable split exercise",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "clean:output": "rimraf dist",
+    "build": "npm run clean:output && parcel build index.html",
+    "start": "parcel index.html"
   },
   "author": "Jair Trejo <jairtrejo@gmail.com>",
   "license": "MIT",
   "devDependencies": {
-    "parcel": "^2.8.0"
+    "parcel": "^2.8.0",
+    "rimraf": "^3.0.2"
   },
   "dependencies": {
     "the-new-css-reset": "^1.7.3"

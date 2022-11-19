@@ -9,9 +9,7 @@
 
 #root.correct {
   transition: background-color 0.1s ease-out;
-  background-color: #ffb602;
-  /*background-color: #b7d23d;*/
-  /*border-color: #89c93f;*/
+  background-color: #b7d23d;
   pointer-events: none;
 }
 
@@ -25,7 +23,7 @@
 
 .letter {
   font-size: 64px;
-  transition: margin 0.15s ease-out 0.02s;
+  transition: margin 0.15s ease-out;
 }
 
 .split-before {
@@ -71,8 +69,10 @@ main {
   max-width: 1000px;
   margin: 0 auto;
   height: 100vh;
-  padding: 64px 1rem;
+  padding: 1rem;
   text-align: center;
+  display: flex;
+  flex-direction: column;
 }
 
 h1 {
@@ -89,16 +89,14 @@ p {
 
 #root {
   display: inline-block;
-  background-color: #fcfcfc;
   padding: 10px 20px;
-  border-radius: 8px;
-  margin: 16px 0;
+  margin: auto 0;
   text-align: center;
 }
 
 #root.game-over {
   font-size: 64px;
-  background-color: #ffb602;
+  background-color: transparent;
 }
 
 p.button-row {
@@ -109,9 +107,14 @@ button {
   border: solid 2px #0b0709;
   border-radius: 4px;
   padding: 0.3rem;
-  width: 6rem;
+  display: inline-block;
+  width: 100%;
   text-align: center;
   cursor: pointer;
+  background-color: transparent;
+  font-family: inherit;
+  font-size: inherit;
+  min-width: 8rem;
 }
 
 button:hover {
@@ -122,5 +125,18 @@ button:active {
   color: #3b3739;
   background-color: transparent;
   border: none;
-  margin-top: 2px;
+}
+
+@media screen and (min-width: 800px){
+  p.button-row {
+    margin-top: 1rem;
+  }
+
+  #root {
+    margin: 16px 0;
+  }
+
+  button {
+    width: revert;
+  }
 }
