@@ -25,23 +25,13 @@ function listen(element, eventName) {
   return p;
 }
 
-function variadicize(f) {
-  return function (...args) {
-    if (args.length > 1) {
-      return args.map(f);
-    } else {
-      return f(args[0]);
-    }
-  };
+function show(element) {
+  element.style.display = "revert";
 }
 
-const show = variadicize(function show(element) {
-  element.style.display = "revert";
-});
-
-const hide = variadicize(function hide(element) {
+function hide(element) {
   element.style.display = "none";
-});
+}
 
 /*
  * Game loop
@@ -86,7 +76,7 @@ const hide = variadicize(function hide(element) {
 
     root.innerText = "Good job!";
     root.classList.add("game-over");
-    hide(checkBtn, nextBtn);
+    hide(nextBtn);
     show(restartBtn);
 
     await listen(restartBtn, "click");
@@ -107,25 +97,26 @@ function syllabificator(root, prompt) {
     clearSplitPoint();
 
     const hovered = e.target;
-    const prevSibling = hovered.previousElementSibling;
-    const nextSibling = hovered.nextElementSibling;
-
     const rect = hovered.getBoundingClientRect();
     const position = (e.x - rect.left) / (rect.right - rect.left);
 
-    if (hovered.innerText === "·") {
-      setSplitPoint(null);
-    } else if (position < 0.5 && prevSibling && prevSibling.innerText !== "·") {
-      setSplitPoint(prevSibling);
-    } else if (
-      position >= 0.5 &&
-      nextSibling &&
-      nextSibling.innerText !== "·"
-    ) {
-      setSplitPoint(hovered);
+    let between = [];
+    if (position < 0.5) {
+      between = [hovered.previousElementSibling, hovered];
     } else {
-      setSplitPoint(null);
+      between = [hovered, hovered.nextElementSibling];
     }
+
+    let splitPoint;
+    if (between[0] === null || between[1] === null) {
+      splitPoint = null;
+    } else if (between[0].innerText === "." || between[1].innerText === ".") {
+      splitPoint = null;
+    } else {
+      splitPoint = between[0];
+    }
+
+    setSplitPoint(splitPoint);
   }
 
   function setSplitPoint(element) {
